@@ -1,5 +1,6 @@
-const fs = require("fs");
-const csv = require("fast-csv");
+import fs from 'fs';
+import csv from 'fast-csv';
+import inquirer from 'inquirer';
 
 const cities = {
     'aracaju': 0,
@@ -69,7 +70,49 @@ const calcTravelCost = (distance, mode) => {
   return price;
 }
 
+const menu = async () => {
+    const choices = [
+        {
+            name: 'Consultar trechos x modalidade',
+            value: 1,
+        },
+        {
+            name: 'Opção 2',
+            value: 2,
+        },
+        {
+            name: 'Opção 3',
+            value: 3,
+        },
+    ];
 
+    const { option } = await inquirer.prompt([
+        {
+            type: 'list',
+            name: 'option',
+            message: 'Escolha uma opção:',
+            choices,
+        },
+    ]);
+
+    switch (option) {
+        case 1:
+            console.log('Opção 1 escolhida');
+            
+            break;
+        case 2:
+            console.log('Opção 2 escolhida');
+            break;
+        case 3:
+            console.log('Opção 3 escolhida');
+            break;
+        default:
+            console.log('Opção inválida');
+            break;
+    }
+};
+
+menu();
 
 const runTasks = async () => { 
     
@@ -78,4 +121,4 @@ const runTasks = async () => {
     console.log(travelCost);
 }
 
-runTasks();
+// runTasks();

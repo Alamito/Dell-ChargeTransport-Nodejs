@@ -1,5 +1,6 @@
 {
   "name": "dell-nodejs",
+  "type": "module",
   "version": "1.0.0",
   "description": "",
   "main": "main.js",
@@ -19,6 +20,7 @@
   "homepage": "https://github.com/Alamito/Dell-Nodejs#readme",
   "dependencies": {
     "fast-csv": "^4.3.6",
-    "fs": "^0.0.1-security"
+    "fs": "^0.0.1-security",
+    "inquirer": "^9.1.5"
   }
 }
