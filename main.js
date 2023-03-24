@@ -1,8 +1,6 @@
 const fs = require("fs");
 const csv = require("fast-csv");
 
-const results = [];
-
 const cities = {
     'aracaju': 0,
     'belem': 1,
@@ -30,21 +28,8 @@ const cities = {
     'vitoria': 23,
 }
 
-// fs.createReadStream("DNIT-Distancias.csv")
-//   .pipe(csv.parse({ headers: true }))
-//   .on("error", (error) => console.error(error))
-//   .on("data", (row) => {
-//     results.push(row);
-//   })
-//   .on("end", () => {
-//       const values = Object.values(results[cities.aracaju])[0].split(";");
-//       const numbers = values
-//         .filter((val) => !isNaN(val))
-//           .map((val) => parseInt(val));
-//       console.log(numbers[cities.belem]);
-//     // Aqui você pode trabalhar com os dados lidos do arquivo CSV.
-//     // Por exemplo, você pode processar os dados, salvá-los em um banco de dados, etc.
-//   });
+const results = [];
+
 const getDistanceCities = async (city1, city2) => {
     let arrayDistanceBetweenCities = [];
 
@@ -68,9 +53,29 @@ const getDistanceCities = async (city1, city2) => {
     return new Promise(promiseCallback);
 }
 
+const calcTravelCost = (distance, mode) => {
+  let price;
+    switch (mode) {
+      case 'smallSize':
+        price = distance * 4.87;
+        break;
+      case 'midSize':
+        price = distance * 11.92;
+        break;
+      case 'bigSize':
+        price = distance * 27.44;
+        break;
+  }
+  return price;
+}
+
+
+
 const runTasks = async () => { 
-    const distanceBetweenCities = await getDistanceCities(cities.curitiba, cities.aracaju);
-    console.log(distanceBetweenCities);
+    
+    const distanceBetweenCities = await getDistanceCities(cities.aracaju, cities.manaus);
+    const travelCost = calcTravelCost(distanceBetweenCities, 'bigSize');
+    console.log(travelCost);
 }
 
 runTasks();
