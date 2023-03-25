@@ -1,6 +1,7 @@
 import fs from 'fs';
 import csv from 'fast-csv';
 import inquirer from 'inquirer';
+import readline from 'readline';
 
 const cities = {
     'aracaju': 0,
@@ -31,10 +32,15 @@ const cities = {
 
 const results = [];
 
+const getIdCity = (city) => { 
+    console.log(cities[city]);
+}
+
 const getDistanceCities = async (city1, city2) => {
+    // getIdCity(city1);
     let arrayDistanceBetweenCities = [];
 
-    const promiseCallback = (resolve, reject) => { 
+    const promiseCallback = (resolve) => { 
         fs.createReadStream("DNIT-Distancias.csv")
         .pipe(csv.parse({ headers: true }))
         .on("error", (error) => console.error(error))
@@ -54,65 +60,121 @@ const getDistanceCities = async (city1, city2) => {
     return new Promise(promiseCallback);
 }
 
-const calcTravelCost = (distance, mode) => {
-  let price;
+const travelCost = (distance, mode) => {
+    let price;
+    let nameTransportMode;
     switch (mode) {
-      case 'smallSize':
-        price = distance * 4.87;
-        break;
-      case 'midSize':
-        price = distance * 11.92;
-        break;
-      case 'bigSize':
-        price = distance * 27.44;
-        break;
-  }
-  return price;
-}
-
-const menu = async () => {
-    const choices = [
-        {
-            name: 'Consultar trechos x modalidade',
-            value: 1,
-        },
-        {
-            name: 'Opção 2',
-            value: 2,
-        },
-        {
-            name: 'Opção 3',
-            value: 3,
-        },
-    ];
-
-    const { option } = await inquirer.prompt([
-        {
-            type: 'list',
-            name: 'option',
-            message: 'Escolha uma opção:',
-            choices,
-        },
-    ]);
-
-    switch (option) {
-        case 1:
-            console.log('Opção 1 escolhida');
-            
+        case '1':
+            price = distance * 4.87;
+            nameTransportMode = 'Caminhão de pequeno porte';
             break;
-        case 2:
-            console.log('Opção 2 escolhida');
+        case '2':
+            price = distance * 11.92;
+            nameTransportMode = 'Caminhão de médio porte';
             break;
-        case 3:
-            console.log('Opção 3 escolhida');
-            break;
-        default:
-            console.log('Opção inválida');
+        case '3':
+            price = distance * 27.44;
+            nameTransportMode = 'Caminhão de grande porte';
             break;
     }
+    return { price, nameTransportMode };
 };
 
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+});
+
+const askCityOfOrigin = async () => {
+    let city = '';
+    const promiseCallback = (resolve) => {
+        rl.question('Digite a cidade de origem: ', (userCity) => {
+            city = userCity;
+            resolve(city);
+        });
+    }
+    return new Promise(promiseCallback);
+};
+
+const askCityOfDestiny = async () => {
+    let city = '';
+    const promiseCallback = (resolve) => {
+        rl.question('Digite a cidade de destino: ', (userDestiny) => {
+            city = userDestiny;
+            resolve(city);
+        });
+    };
+    return new Promise(promiseCallback);
+};
+
+const askTransportMode = async () => { 
+    let mode = '';
+    const promiseCallback = (resolve) => {
+        rl.question('Digite a modalidade de transporte: ', (userMode) => {
+            mode = userMode;
+            resolve(mode);
+        });
+    };
+    return new Promise(promiseCallback);
+}
+
+
+const menu = async () => {
+    console.log('Escolha uma opção:');
+    console.log('1 - Consultar trechos x modalidade');
+    console.log('2 - Opção 2');
+    console.log('3 - Sair');
+
+    rl.question('Opção escolhida: ', async (opcao) => {
+        switch (opcao) {
+            case '1':
+                const cityOrigin = await askCityOfOrigin();
+                const cityDestiny = await askCityOfDestiny();
+                const transportMode = await askTransportMode();
+
+                let distanceBetweenCities;
+                let travel;
+
+                if (findCity(cities, cityOrigin) && findCity(cities, cityDestiny)) {
+                    distanceBetweenCities = await getDistanceCities(cities[cityOrigin], cities[cityDestiny]);
+                }
+
+                if (transportMode === '1' || transportMode === '2' || transportMode === '3') { 
+                    travel = travelCost(distanceBetweenCities, transportMode);
+                }
+
+                console.log(`De ${cityOrigin} para ${cityDestiny}, utilizando um ${travel.nameTransportMode}, a distância é de ${distanceBetweenCities} km e o custo será de R$ ${travel.price.toFixed(2)}.`);
+
+                rl.close();
+
+                break;
+            case '2':
+                console.log('Você escolheu a opção 2.\n');
+                menu();
+                break;
+            case '3':
+                console.log('Até logo!');
+                rl.close();
+                break;
+            default:
+                console.log('Opção inválida.\n');
+                menu();
+                break;
+        }
+    });
+}
+
 menu();
+
+const findCity = async (cities, city) => {
+    let find = false;
+    for (let property in cities) { 
+        if (property === city) { 
+            find = true;
+        }
+    }
+    return find;
+}
 
 const runTasks = async () => { 
     
@@ -122,3 +184,5 @@ const runTasks = async () => {
 }
 
 // runTasks();
+
+// teste();
