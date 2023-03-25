@@ -30,11 +30,17 @@ const cities = {
     vitoria: 23,
 };
 
-const showOptionsTravel = () => { 
-    console.log(`\nCidades disponíveis para consulta: Aracaju, Belém, Belo Horizonte, Brasília, Campo Grande, á, Curitiba, Florianópolis, Fortaleza, Goiânia, João Pessoa, Maceió, Manaus, Natal, Porto Alegre, Porto Velho, Recife, Rio Branco, Rio de Janeiro, Salvador, São Luís, São Paulo, Teresina, Vitória\n`);
-    console.log(`Modalidades de transporte disponíveis: 1 - Caminhão de pequeno porte, 2 - Caminhão de médio porte, 3 - Caminhão de grande porte\n`);
-    console.log(`A seguir insira os nomes das cidades sem acentos e a modalidade de transporte conforme o número dela >\n`);
-}
+const showOptionsTravel = () => {
+    console.log(
+        `\nCidades disponíveis para consulta: Aracaju, Belém, Belo Horizonte, Brasília, Campo Grande, á, Curitiba, Florianópolis, Fortaleza, Goiânia, João Pessoa, Maceió, Manaus, Natal, Porto Alegre, Porto Velho, Recife, Rio Branco, Rio de Janeiro, Salvador, São Luís, São Paulo, Teresina, Vitória\n`,
+    );
+    console.log(
+        `Modalidades de transporte disponíveis: 1 - Caminhão de pequeno porte, 2 - Caminhão de médio porte, 3 - Caminhão de grande porte\n`,
+    );
+    console.log(
+        `A seguir insira os nomes das cidades e a modalidade de transporte conforme o número dela >\n`,
+    );
+};
 
 const results = [];
 
@@ -146,9 +152,9 @@ const checkValidityInputCity = async (askCity) => {
 
 const removeAccent = (word) => {
     return word.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-}
+};
 
-const checkValidityInputMode = async () => { 
+const checkValidityInputMode = async () => {
     let mode = '';
     do {
         mode = await askTransportMode();
@@ -158,7 +164,7 @@ const checkValidityInputMode = async () => {
     } while (mode !== '1' && mode !== '2' && mode !== '3');
 
     return mode;
-}
+};
 
 const showMenu = async () => {
     console.log('Escolha uma opção:');
@@ -170,7 +176,7 @@ const showMenu = async () => {
         switch (option) {
             case '1':
                 showOptionsTravel();
-                
+
                 let cityOrigin = '';
                 let cityDestiny = '';
 
@@ -178,13 +184,19 @@ const showMenu = async () => {
                 cityDestiny = await checkValidityInputCity(askCityOfDestiny);
                 const transportMode = await checkValidityInputMode();
 
-                const distanceBetweenCities = await getDistanceCities(cities[cityOrigin],cities[cityDestiny],);
+                const distanceBetweenCities = await getDistanceCities(
+                    cities[cityOrigin],
+                    cities[cityDestiny],
+                );
                 const travel = travelCost(distanceBetweenCities, transportMode);
 
                 console.log(
                     `De ${cityOrigin.toLocaleUpperCase()} para ${cityDestiny.toLocaleUpperCase()}, utilizando um ${
                         travel.nameTransportMode
-                    }, a distância é de ${distanceBetweenCities} Km e o custo será de R$ ${travel.price.toFixed(2)}.`);
+                    }, a distância é de ${distanceBetweenCities} Km e o custo será de R$ ${travel.price.toFixed(
+                        2,
+                    )}.`,
+                );
 
                 rl.close();
 
