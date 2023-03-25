@@ -30,16 +30,29 @@ const cities = {
     vitoria: 23,
 };
 
-const showOptionsTravel = () => {
-    console.log(
-        `\nCidades disponíveis para consulta: Aracaju, Belém, Belo Horizonte, Brasília, Campo Grande, á, Curitiba, Florianópolis, Fortaleza, Goiânia, João Pessoa, Maceió, Manaus, Natal, Porto Alegre, Porto Velho, Recife, Rio Branco, Rio de Janeiro, Salvador, São Luís, São Paulo, Teresina, Vitória\n`,
-    );
-    console.log(
-        `Modalidades de transporte disponíveis: 1 - Caminhão de pequeno porte, 2 - Caminhão de médio porte, 3 - Caminhão de grande porte\n`,
-    );
-    console.log(
-        `A seguir insira os nomes das cidades e a modalidade de transporte conforme o número dela >\n`,
-    );
+const showOptionsTravel = (option) => {
+    switch (option) {
+        case '1':
+            console.log(
+                `\nCidades disponíveis para consulta: Aracaju, Belém, Belo Horizonte, Brasília, Campo Grande, á, Curitiba, Florianópolis, Fortaleza, Goiânia, João Pessoa, Maceió, Manaus, Natal, Porto Alegre, Porto Velho, Recife, Rio Branco, Rio de Janeiro, Salvador, São Luís, São Paulo, Teresina, Vitória\n`,
+            );
+            console.log(
+                `Modalidades de transporte disponíveis: 1 - Caminhão de pequeno porte, 2 - Caminhão de médio porte, 3 - Caminhão de grande porte\n`,
+            );
+            console.log(
+                `A seguir insira os nomes das cidades e a modalidade de transporte conforme o número dela >\n`,
+            );
+            break;
+        case '2':
+            console.log(
+                `\nCidades disponíveis para consulta: Aracaju, Belém, Belo Horizonte, Brasília, Campo Grande, á, Curitiba, Florianópolis, Fortaleza, Goiânia, João Pessoa, Maceió, Manaus, Natal, Porto Alegre, Porto Velho, Recife, Rio Branco, Rio de Janeiro, Salvador, São Luís, São Paulo, Teresina, Vitória\n`,
+            );
+            console.log(`Produtos disponíveis para transporte: 1 - Celular | 0.5 Kg; 2 - Geladeira | 60 Kg; 3 - Freezer | 100 Kg; 4 - Cadeira | 5 Kg; 5 - Luminária | 0.8 Kg; 9 - Lavadora de roupas | 120 Kg\n`);
+            break;
+        default:
+            break;
+    }
+    
 };
 
 const results = [];
@@ -178,20 +191,22 @@ const askCityOfDestinyOptionTwo = async (noLog = false) => {
     return new Promise(promiseCallback);
 }
 
-const askTransportProductTotal = async () => { 
-    let productAndWeight = [];
+const askTransportProductTotal = async (noLog) => { 
+    let productAndQuantity = [];
 
-    (!noLog) && console.log('A seguir insira o nome do produto e seu peso total de transporte, para finalizar digite "0" em produto');
+    (!noLog) && console.log('A seguir insira o ID (numero) do produto e sua quantidade, para finalizar digite um ID inexistente');
     const promiseCallback = (resolve) => { 
-        rl.question('Digite o nome do produto: ', (product) => {
-            if (product === '0') {
-                resolve(productAndWeight);
+        rl.question('Digite o ID do produto: ', (idProduct) => {
+            if (parseInt(idProduct) < 1 || parseInt(idProduct) > 9) {
+                productAndQuantity.push(0);
+                resolve(productAndQuantity);
+            } else {
+                productAndQuantity.push(idProduct);
+                rl.question('Digite a quantidade do produto: ', (quantity) => {
+                    productAndQuantity.push(quantity);
+                    resolve(productAndQuantity);
+                });
             }
-            productAndWeight.push(product);
-            rl.question('Digite o peso do produto: ', (weight) => {
-                productAndWeight.push(weight);
-                resolve(productAndWeight);
-            });
         });
     }
     return new Promise(promiseCallback);
@@ -206,7 +221,7 @@ const showMenu = async () => {
     rl.question('Opção escolhida: ', async (option) => {
         switch (option) {
             case '1':
-                showOptionsTravel();
+                showOptionsTravel(1);
 
                 let cityOrigin = '';
                 let cityDestiny = '';
@@ -233,7 +248,7 @@ const showMenu = async () => {
 
                 break;
             case '2':
-                console.log('Você escolheu a opção 2.\n');
+                showOptionsTravel(2);
 
                 // const cityOriginOptionTwo = await checkValidityInputCity(askCityOfOrigin);
                 let citiesDestiny = [];
@@ -246,18 +261,18 @@ const showMenu = async () => {
                 //     noLog = true;
                 // } while (citiesDestiny[citiesDestiny.length - 1] !== '0');
                 
-                let totalProductsAndWeight = [];
+                let totalproductAndQuantity = [];
                 let IndexlastAddedProduct;
                 const indexProduct = 0;
                 noLog = false;
 
                 do {
-                    totalProductsAndWeight.push(await askTransportProductTotal(noLog));
-                    IndexlastAddedProduct = totalProductsAndWeight.length - 1;
+                    totalproductAndQuantity.push(await askTransportProductTotal(noLog));
+                    IndexlastAddedProduct = totalproductAndQuantity.length - 1;
                     noLog = true;
-                } while (totalProductsAndWeight[IndexlastAddedProduct][indexProduct] !== '0');
+                } while (totalproductAndQuantity[IndexlastAddedProduct][indexProduct] !== 0);
 
-                console.log(totalProductsAndWeight);
+                console.log(totalproductAndQuantity);
 
 
                 
