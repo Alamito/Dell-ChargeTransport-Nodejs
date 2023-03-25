@@ -166,10 +166,41 @@ const checkValidityInputMode = async () => {
     return mode;
 };
 
+const askCityOfDestinyOptionTwo = async (noLog = false) => { 
+    // let city = '';
+
+    (!noLog) && console.log('Digite a(s) cidade(s) de destino em ordem de parada, para finalizar digite "0"');
+    const promiseCallback = (resolve) => { 
+        rl.question('Cidade de destino: ', (city) => {
+            resolve(city);
+        });
+    }
+    return new Promise(promiseCallback);
+}
+
+const askTransportProductTotal = async () => { 
+    let productAndWeight = [];
+
+    (!noLog) && console.log('A seguir insira o nome do produto e seu peso total de transporte, para finalizar digite "0" em produto');
+    const promiseCallback = (resolve) => { 
+        rl.question('Digite o nome do produto: ', (product) => {
+            if (product === '0') {
+                resolve(productAndWeight);
+            }
+            productAndWeight.push(product);
+            rl.question('Digite o peso do produto: ', (weight) => {
+                productAndWeight.push(weight);
+                resolve(productAndWeight);
+            });
+        });
+    }
+    return new Promise(promiseCallback);
+}
+
 const showMenu = async () => {
-    console.log('Escolha uma opção:');
+    console.log('\nEscolha uma opção:');
     console.log('1 - Consultar trechos x modalidade');
-    console.log('2 - Opção 2');
+    console.log('2 - Cadastrar transporte');
     console.log('3 - Sair');
 
     rl.question('Opção escolhida: ', async (option) => {
@@ -203,7 +234,37 @@ const showMenu = async () => {
                 break;
             case '2':
                 console.log('Você escolheu a opção 2.\n');
-                showMenu();
+
+                // const cityOriginOptionTwo = await checkValidityInputCity(askCityOfOrigin);
+                let citiesDestiny = [];
+                let noLog = false;
+
+                // console.log(await askTransportProductTotal());
+
+                // do {
+                //     citiesDestiny.push(await askCityOfDestinyOptionTwo(noLog));
+                //     noLog = true;
+                // } while (citiesDestiny[citiesDestiny.length - 1] !== '0');
+                
+                let totalProductsAndWeight = [];
+                let IndexlastAddedProduct;
+                const indexProduct = 0;
+                noLog = false;
+
+                do {
+                    totalProductsAndWeight.push(await askTransportProductTotal(noLog));
+                    IndexlastAddedProduct = totalProductsAndWeight.length - 1;
+                    noLog = true;
+                } while (totalProductsAndWeight[IndexlastAddedProduct][indexProduct] !== '0');
+
+                console.log(totalProductsAndWeight);
+
+
+                
+                // console.log(citiesDestiny);
+
+                rl.close();
+                // showMenu();
                 break;
             case '3':
                 console.log('Até logo!');
