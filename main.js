@@ -30,9 +30,18 @@ const cities = {
     vitoria: 23,
 };
 
+const weightOfProducts = {
+    1: 0.5,
+    2: 60,
+    3: 100,
+    4: 5,
+    5: 0.8,
+    6: 120,
+};
+
 const showOptionsTravel = (option) => {
     switch (option) {
-        case '1':
+        case 1:
             console.log(
                 `\nCidades disponíveis para consulta: Aracaju, Belém, Belo Horizonte, Brasília, Campo Grande, á, Curitiba, Florianópolis, Fortaleza, Goiânia, João Pessoa, Maceió, Manaus, Natal, Porto Alegre, Porto Velho, Recife, Rio Branco, Rio de Janeiro, Salvador, São Luís, São Paulo, Teresina, Vitória\n`,
             );
@@ -43,11 +52,11 @@ const showOptionsTravel = (option) => {
                 `A seguir insira os nomes das cidades e a modalidade de transporte conforme o número dela >\n`,
             );
             break;
-        case '2':
+        case 2:
             console.log(
                 `\nCidades disponíveis para consulta: Aracaju, Belém, Belo Horizonte, Brasília, Campo Grande, á, Curitiba, Florianópolis, Fortaleza, Goiânia, João Pessoa, Maceió, Manaus, Natal, Porto Alegre, Porto Velho, Recife, Rio Branco, Rio de Janeiro, Salvador, São Luís, São Paulo, Teresina, Vitória\n`,
             );
-            console.log(`Produtos disponíveis para transporte: 1 - Celular | 0.5 Kg; 2 - Geladeira | 60 Kg; 3 - Freezer | 100 Kg; 4 - Cadeira | 5 Kg; 5 - Luminária | 0.8 Kg; 9 - Lavadora de roupas | 120 Kg\n`);
+            console.log(`Produtos disponíveis para transporte: 1 - Celular [0.5 Kg]; 2 - Geladeira [60 Kg]; 3 - Freezer [100 Kg]; 4 - Cadeira [5 Kg]; 5 - Luminária [0.8 Kg]; 6 - Lavadora de roupas [120 Kg]\n`);
             break;
         default:
             break;
@@ -201,9 +210,9 @@ const askTransportProductTotal = async (noLog) => {
                 productAndQuantity.push(0);
                 resolve(productAndQuantity);
             } else {
-                productAndQuantity.push(idProduct);
+                productAndQuantity.push(parseInt(idProduct));
                 rl.question('Digite a quantidade do produto: ', (quantity) => {
-                    productAndQuantity.push(quantity);
+                    productAndQuantity.push(parseInt(quantity));
                     resolve(productAndQuantity);
                 });
             }
@@ -211,6 +220,27 @@ const askTransportProductTotal = async (noLog) => {
     }
     return new Promise(promiseCallback);
 }
+
+const calcQuantityTruck = (weight) => { 
+    const quantityTruckLarge = Math.floor(weight / 10000);
+
+    const quantityTruckMedium = Math.floor((weight - quantityTruckLarge * 10000) / 4000);
+
+    const quantityTruckSmall = Math.ceil((weight - (quantityTruckMedium * 4000 + quantityTruckLarge * 10000)) / 1000);
+
+    return {truckLarge: quantityTruckLarge, truckMedium: quantityTruckMedium, truckSmall: quantityTruckSmall};
+}
+
+const calcTotalWeight = (weightOfProducts, productAndQuantity) => {
+    let weight = 0;
+
+    for (let i = 0; i < productAndQuantity.length - 1; i += 1) {
+        console.log(weightOfProducts[productAndQuantity[i][0]], productAndQuantity[i][1]);
+        weight += weightOfProducts[productAndQuantity[i][0]] * productAndQuantity[i][1];
+    }
+
+    return weight;
+};
 
 const showMenu = async () => {
     console.log('\nEscolha uma opção:');
@@ -272,7 +302,11 @@ const showMenu = async () => {
                     noLog = true;
                 } while (totalproductAndQuantity[IndexlastAddedProduct][indexProduct] !== 0);
 
-                console.log(totalproductAndQuantity);
+                const totalWeight = calcTotalWeight(weightOfProducts, totalproductAndQuantity);
+
+                const quantityTruck = calcQuantityTruck(totalWeight);
+
+                console.log(quantityTruck);
 
 
                 
