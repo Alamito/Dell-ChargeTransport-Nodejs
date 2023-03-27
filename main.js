@@ -50,23 +50,13 @@ const nameByIdProducts = {
 const showOptionsTravel = (option) => {
     switch (option) {
         case 1:
-            console.log(
-                `\nCidades disponíveis para consulta: Aracaju, Belém, Belo Horizonte, Brasília, Campo Grande, á, Curitiba, Florianópolis, Fortaleza, Goiânia, João Pessoa, Maceió, Manaus, Natal, Porto Alegre, Porto Velho, Recife, Rio Branco, Rio de Janeiro, Salvador, São Luís, São Paulo, Teresina, Vitória\n`,
-            );
-            console.log(
-                `Modalidades de transporte disponíveis: 1 - Caminhão de pequeno porte, 2 - Caminhão de médio porte, 3 - Caminhão de grande porte\n`,
-            );
-            console.log(
-                `A seguir insira os nomes das cidades e a modalidade de transporte conforme o número dela >\n`,
-            );
+            console.log(`\nCidades disponíveis para consulta: Aracaju, Belém, Belo Horizonte, Brasília, Campo Grande, á, Curitiba, Florianópolis, Fortaleza, Goiânia, João Pessoa, Maceió, Manaus, Natal, Porto Alegre, Porto Velho, Recife, Rio Branco, Rio de Janeiro, Salvador, São Luís, São Paulo, Teresina, Vitória\n`);
+            console.log(`Modalidades de transporte disponíveis: 1 - Caminhão de pequeno porte, 2 - Caminhão de médio porte, 3 - Caminhão de grande porte\n`);
+            console.log(`A seguir insira os nomes das cidades e a modalidade de transporte conforme o número dela >\n`);
             break;
         case 2:
-            console.log(
-                `\nCidades disponíveis para consulta: Aracaju, Belém, Belo Horizonte, Brasília, Campo Grande, á, Curitiba, Florianópolis, Fortaleza, Goiânia, João Pessoa, Maceió, Manaus, Natal, Porto Alegre, Porto Velho, Recife, Rio Branco, Rio de Janeiro, Salvador, São Luís, São Paulo, Teresina, Vitória\n`,
-            );
-            console.log(
-                `Produtos disponíveis para transporte: 1 - Celular [0.5 Kg]; 2 - Geladeira [60 Kg]; 3 - Freezer [100 Kg]; 4 - Cadeira [5 Kg]; 5 - Luminária [0.8 Kg]; 6 - Lavadora de roupas [120 Kg]\n`,
-            );
+            console.log(`\nCidades disponíveis para consulta: Aracaju, Belém, Belo Horizonte, Brasília, Campo Grande, á, Curitiba, Florianópolis, Fortaleza, Goiânia, João Pessoa, Maceió, Manaus, Natal, Porto Alegre, Porto Velho, Recife, Rio Branco, Rio de Janeiro, Salvador, São Luís, São Paulo, Teresina, Vitória\n`);
+            console.log(`Produtos disponíveis para transporte: 1 - Celular [0.5 Kg]; 2 - Geladeira [60 Kg]; 3 - Freezer [100 Kg]; 4 - Cadeira [5 Kg]; 5 - Luminária [0.8 Kg]; 6 - Lavadora de roupas [120 Kg]\n`);
             break;
         default:
             break;
@@ -86,12 +76,8 @@ const getDistanceCities = async (city1, city2) => {
                 results.push(row);
             })
             .on('end', () => {
-                const transformJsonInArray = Object.values(
-                    results[city1],
-                )[0].split(';');
-                arrayDistanceBetweenCities = transformJsonInArray
-                    .filter((val) => !isNaN(val))
-                    .map((val) => parseInt(val));
+                const transformJsonInArray = Object.values(results[city1])[0].split(';');
+                arrayDistanceBetweenCities = transformJsonInArray.filter((val) => !isNaN(val)).map((val) => parseInt(val));
 
                 resolve(arrayDistanceBetweenCities[city2]);
             });
@@ -200,10 +186,7 @@ const checkValidityInputMode = async () => {
 const askCityOfDestinyOptionTwo = async (noLog = false) => {
     // let city = '';
 
-    !noLog &&
-        console.log(
-            'Digite a(s) cidade(s) de destino em ordem de parada, para finalizar digite "0"',
-        );
+    !noLog && console.log('Digite a(s) cidade(s) de destino em ordem de parada, para finalizar digite "0"');
     const promiseCallback = (resolve) => {
         rl.question('Cidade de destino: ', (city) => {
             resolve(city);
@@ -215,10 +198,7 @@ const askCityOfDestinyOptionTwo = async (noLog = false) => {
 const askTransportProductTotal = async (noLog) => {
     let productAndQuantity = [];
 
-    !noLog &&
-        console.log(
-            'A seguir insira o ID (numero) do produto e sua quantidade, para finalizar digite um ID inexistente',
-        );
+    !noLog && console.log('A seguir insira o ID (numero) do produto e sua quantidade, para finalizar digite um ID inexistente');
     const promiseCallback = (resolve) => {
         rl.question('Digite o ID do produto: ', (idProduct) => {
             if (parseInt(idProduct) < 1 || parseInt(idProduct) > 9) {
@@ -239,14 +219,9 @@ const askTransportProductTotal = async (noLog) => {
 const calcQuantityTruck = (weight) => {
     const quantityTruckLarge = Math.floor(weight / 10000);
 
-    const quantityTruckMedium = Math.floor(
-        (weight - quantityTruckLarge * 10000) / 4000,
-    );
+    const quantityTruckMedium = Math.floor((weight - quantityTruckLarge * 10000) / 4000);
 
-    const quantityTruckSmall = Math.ceil(
-        (weight - (quantityTruckMedium * 4000 + quantityTruckLarge * 10000)) /
-            1000,
-    );
+    const quantityTruckSmall = Math.ceil((weight - (quantityTruckMedium * 4000 + quantityTruckLarge * 10000)) / 1000);
 
     return {
         truckLarge: quantityTruckLarge,
@@ -259,9 +234,7 @@ const calcTotalWeight = (weightOfProducts, productAndQuantity) => {
     let weight = 0;
 
     for (let i = 0; i < productAndQuantity.length - 1; i += 1) {
-        weight +=
-            weightOfProducts[productAndQuantity[i][0]] *
-            productAndQuantity[i][1];
+        weight += weightOfProducts[productAndQuantity[i][0]] * productAndQuantity[i][1];
     }
 
     return weight;
@@ -309,25 +282,15 @@ const calcMediumPriceByProduct = (priceTravel, products) => {
     return priceTravel / quantityProducts;
 };
 
-const showUserinfoTravel = async (
-    cityOrigin,
-    citiesDestiny,
-    cities,
-    nameByIdProducts,
-    products,
-    quantityTruck,
-) => {
+const showUserinfoTravel = async (cityOrigin, citiesDestiny, cities, nameByIdProducts, products, quantityTruck) => {
     citiesDestiny.pop();
     products.pop();
     const lastCity = citiesDestiny.length - 1;
-    const distanceBetweenCities = await getDistanceCities(
-        cities[cityOrigin],
-        cities[citiesDestiny[lastCity]],
-    );
+    const distanceBetweenCities = await getDistanceCities(cities[cityOrigin], cities[citiesDestiny[lastCity]]);
 
-    let stringNameProducts = products.map((namesProducts) => nameByIdProducts[namesProducts[0]],);
+    let stringNameProducts = products.map((namesProducts) => nameByIdProducts[namesProducts[0]]);
     stringNameProducts = stringNameProducts.join(', '); // adiciona espaco depois da virgula
-    
+
     const stringQuantityTrucks = buildStringQuantityTrucks(quantityTruck);
 
     const totalPrice = calcPriceTravelByTruck(quantityTruck, distanceBetweenCities);
@@ -336,28 +299,10 @@ const showUserinfoTravel = async (
 
     if (citiesDestiny.length === 1) {
         // viagem direta
-        console.log(
-            `De ${cityOrigin} para ${
-                citiesDestiny[lastCity]
-            }, a distancia total a ser percorrida é de ${distanceBetweenCities} Km, para transportes dos produtos ${stringNameProducts}, será necessário utilizar ${stringQuantityTrucks}, de forma a resultar o menos custo por Km rodado. O valor total do transporte dos itens é R$ ${totalPrice.toFixed(
-                2,
-            )}, sendo R$ ${mediumPriceByProduct.toFixed(
-                2,
-            )} o custo unitário médio.`,
-        );
+        console.log(`De ${cityOrigin} para ${citiesDestiny[lastCity]}, a distancia total a ser percorrida é de ${distanceBetweenCities} Km, para transportes dos produtos ${stringNameProducts}, será necessário utilizar ${stringQuantityTrucks}, de forma a resultar o menos custo por Km rodado. O valor total do transporte dos itens é R$ ${totalPrice.toFixed(2)}, sendo R$ ${mediumPriceByProduct.toFixed(2)} o custo unitário médio.`);
     } else {
         // viagem com paradas
-        console.log(
-            `de ${cityOrigin} para ${
-                citiesDestiny[lastCity]
-            } parando em ${citiesDestiny
-                .slice(0, lastCity)
-                .join(
-                    ', ',
-                )}, a distancia total a ser percorrida é de ${distanceBetweenCities} Km para transportes dos produtos ${products.map(
-                (namesProducts) => nameByIdProducts[namesProducts[0]],
-            )}`,
-        );
+        console.log(`de ${cityOrigin} para ${citiesDestiny[lastCity]} parando em ${citiesDestiny.slice(0, lastCity).join(', ')}, a distancia total a ser percorrida é de ${distanceBetweenCities} Km para transportes dos produtos ${products.map((namesProducts) => nameByIdProducts[namesProducts[0]])}`);
     }
 };
 
@@ -379,19 +324,10 @@ const showMenu = async () => {
                 cityDestiny = await checkValidityInputCity(askCityOfDestiny);
                 const transportMode = await checkValidityInputMode();
 
-                const distanceBetweenCities = await getDistanceCities(
-                    cities[cityOrigin],
-                    cities[cityDestiny],
-                );
+                const distanceBetweenCities = await getDistanceCities(cities[cityOrigin], cities[cityDestiny]);
                 const travel = travelCost(distanceBetweenCities, transportMode);
 
-                console.log(
-                    `De ${cityOrigin.toLocaleUpperCase()} para ${cityDestiny.toLocaleUpperCase()}, utilizando um ${
-                        travel.nameTransportMode
-                    }, a distância é de ${distanceBetweenCities} Km e o custo será de R$ ${travel.price.toFixed(
-                        2,
-                    )}.`,
-                );
+                console.log(`De ${cityOrigin.toLocaleUpperCase()} para ${cityDestiny.toLocaleUpperCase()}, utilizando um ${travel.nameTransportMode}, a distância é de ${distanceBetweenCities} Km e o custo será de R$ ${travel.price.toFixed(2)}.`);
 
                 showMenu();
 
@@ -399,9 +335,7 @@ const showMenu = async () => {
             case '2':
                 showOptionsTravel(2);
 
-                const cityOriginOptionTwo = await checkValidityInputCity(
-                    askCityOfOrigin,
-                );
+                const cityOriginOptionTwo = await checkValidityInputCity(askCityOfOrigin);
                 let citiesDestiny = [];
                 let noLog = false;
 
@@ -416,32 +350,16 @@ const showMenu = async () => {
                 noLog = false;
 
                 do {
-                    totalproductAndQuantity.push(
-                        await askTransportProductTotal(noLog),
-                    );
+                    totalproductAndQuantity.push(await askTransportProductTotal(noLog));
                     IndexlastAddedProduct = totalproductAndQuantity.length - 1;
                     noLog = true;
-                } while (
-                    totalproductAndQuantity[IndexlastAddedProduct][
-                        indexProduct
-                    ] !== 0
-                );
+                } while (totalproductAndQuantity[IndexlastAddedProduct][indexProduct] !== 0);
 
-                const totalWeight = calcTotalWeight(
-                    weightOfProducts,
-                    totalproductAndQuantity,
-                );
+                const totalWeight = calcTotalWeight(weightOfProducts, totalproductAndQuantity);
 
                 const quantityTruck = calcQuantityTruck(totalWeight);
 
-                await showUserinfoTravel(
-                    cityOriginOptionTwo,
-                    citiesDestiny,
-                    cities,
-                    nameByIdProducts,
-                    totalproductAndQuantity,
-                    quantityTruck,
-                );
+                await showUserinfoTravel(cityOriginOptionTwo, citiesDestiny, cities, nameByIdProducts, totalproductAndQuantity, quantityTruck);
 
                 // console.log('Carga cadastrada com sucesso!');
 
