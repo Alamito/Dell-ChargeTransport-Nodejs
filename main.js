@@ -45,6 +45,7 @@ const nameByIdProducts = {
     3: 'Freezer',
     4: 'Cadeira',
     5: 'Luminária',
+    6: 'Lavadora de roupas',
 };
 
 const showOptionsTravel = (option) => {
@@ -299,10 +300,26 @@ const showUserinfoTravel = async (cityOrigin, citiesDestiny, cities, nameByIdPro
 
     if (citiesDestiny.length === 1) {
         // viagem direta
-        console.log(`De ${cityOrigin} para ${citiesDestiny[lastCity]}, a distancia total a ser percorrida é de ${distanceBetweenCities} Km, para transportes dos produtos ${stringNameProducts}, será necessário utilizar ${stringQuantityTrucks}, de forma a resultar o menos custo por Km rodado. O valor total do transporte dos itens é R$ ${totalPrice.toFixed(2)}, sendo R$ ${mediumPriceByProduct.toFixed(2)} o custo unitário médio.`);
+        process.stdout.write(`De ${cityOrigin} para ${citiesDestiny[lastCity]}`);
+        process.stdout.write(` a distancia total a ser percorrida é de ${distanceBetweenCities} Km,`);
+        process.stdout.write(` para transportes dos produtos ${stringNameProducts},`);
+        process.stdout.write(` será necessário utilizar ${stringQuantityTrucks},`);
+        process.stdout.write(` de forma a resultar no menor custo por Km rodado.`);
+        process.stdout.write(` O valor total do transporte dos itens é R$ ${totalPrice.toFixed(2)},`);
+        process.stdout.write(` sendo R$ ${mediumPriceByProduct.toFixed(2)} o custo unitário médio.`);
     } else {
         // viagem com paradas
-        console.log(`de ${cityOrigin} para ${citiesDestiny[lastCity]} parando em ${citiesDestiny.slice(0, lastCity).join(', ')}, a distancia total a ser percorrida é de ${distanceBetweenCities} Km para transportes dos produtos ${products.map((namesProducts) => nameByIdProducts[namesProducts[0]])}`);
+        const stringStopCities = citiesDestiny.slice(0, lastCity).join(', ');
+        process.stdout.write(`De ${cityOrigin} para ${citiesDestiny[lastCity]} parando em ${stringStopCities},`);
+        process.stdout.write(` a distancia total a ser percorrida é de ${distanceBetweenCities} Km,`);
+        process.stdout.write(` para transportes dos produtos ${stringNameProducts},`);
+        process.stdout.write(` será necessário utilizar ${stringQuantityTrucks},`);
+        process.stdout.write(` de forma a resultar no menor custo por Km rodado.`);
+        process.stdout.write(` O valor total do transporte dos itens é R$ ${totalPrice.toFixed(2)},`);
+        process.stdout.write(` sendo R$ ${mediumPriceByProduct.toFixed(2)} o custo unitário médio.`);
+        // o console.log() possui quebra de linha no final logo seria necessario escrever tudo em um unico console.log()
+        // para que as mensagens ficassem na mesma linha
+        // entao foi utilizado o process.stdout.write() para evitar a quebra de linha e deixar o codigo mais limpo
     }
 };
 
@@ -327,7 +344,9 @@ const showMenu = async () => {
                 const distanceBetweenCities = await getDistanceCities(cities[cityOrigin], cities[cityDestiny]);
                 const travel = travelCost(distanceBetweenCities, transportMode);
 
-                console.log(`De ${cityOrigin.toLocaleUpperCase()} para ${cityDestiny.toLocaleUpperCase()}, utilizando um ${travel.nameTransportMode}, a distância é de ${distanceBetweenCities} Km e o custo será de R$ ${travel.price.toFixed(2)}.`);
+                process.stdout.write(`De ${cityOrigin.toLocaleUpperCase()} para ${cityDestiny.toLocaleUpperCase()},`);
+                process.stdout.write(` utilizando um ${travel.nameTransportMode}, a distância é de ${distanceBetweenCities} Km`);
+                process.stdout.write(` e o custo será de R$ ${travel.price.toFixed(2)}.`);
 
                 showMenu();
 
