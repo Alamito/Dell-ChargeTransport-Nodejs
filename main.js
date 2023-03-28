@@ -207,13 +207,17 @@ const askTransportProductTotal = async (noLog) => {
     !noLog && console.log('A seguir insira o ID (numero) do produto e sua quantidade, para finalizar digite um ID inexistente');
     const promiseCallback = (resolve) => {
         rl.question('Digite o ID do produto: ', (idProduct) => {
-            if (parseInt(idProduct) < 1 || parseInt(idProduct) > 9) {
+            if (parseInt(idProduct) < 1 || parseInt(idProduct) > 6) {
                 productAndQuantity.push(0);
                 resolve(productAndQuantity);
             } else {
                 productAndQuantity.push(parseInt(idProduct));
                 rl.question('Digite a quantidade do produto: ', (quantity) => {
                     productAndQuantity.push(parseInt(quantity));
+                    if (parseInt(quantity) <= 0) {
+                        console.log('Quantidade inválida, tente novamente.');
+                        resolve(null)
+                    }
                     resolve(productAndQuantity);
                 });
             }
@@ -312,7 +316,7 @@ const showUserinfoTravel = async (cityOrigin, citiesDestiny, cities, nameByIdPro
         const mediumPriceByProduct = calcMediumPriceByProduct(totalPrice, products);
         const stringQuantityTrucks = buildStringQuantityTrucks(quantityTruck);
 
-        process.stdout.write(`De ${cityOrigin} para ${citiesDestiny[lastCity]}`);
+        process.stdout.write(`De ${cityOrigin.toLocaleUpperCase()} para ${citiesDestiny[lastCity].toLocaleUpperCase()}`);
         process.stdout.write(` a distancia total a ser percorrida é de ${distanceBetweenCities} Km,`);
         process.stdout.write(` para transportes dos produtos ${stringNameProducts},`);
         process.stdout.write(` será necessário utilizar ${stringQuantityTrucks},`);
@@ -487,12 +491,19 @@ const showMenu = async () => {
                 let IndexlastAddedProduct;
                 const indexProduct = 0;
                 noLog = false;
+                let response = [];
 
                 do {
-                    totalproductAndQuantity.push(await askTransportProductTotal(noLog));
+                    response = await askTransportProductTotal(noLog);
                     IndexlastAddedProduct = totalproductAndQuantity.length - 1;
+                    console.log(response);
+                    if (response != null) {
+                        totalproductAndQuantity.push(response);
+                    }
+                    console.log(totalproductAndQuantity);
+                    
                     noLog = true;
-                } while (totalproductAndQuantity[IndexlastAddedProduct][indexProduct] !== 0);
+                } while (response[indexProduct] !== 0);
 
                 totalproductAndQuantity.pop();
                 const totalWeight = calcTotalWeight(weightOfProducts, totalproductAndQuantity);
