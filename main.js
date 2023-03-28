@@ -1,6 +1,5 @@
 import fs from 'fs';
 import csv from 'fast-csv';
-import inquirer from 'inquirer';
 import readline from 'readline';
 
 const cities = {
@@ -48,6 +47,11 @@ const nameByIdProducts = {
     6: 'Lavadora de roupas',
 };
 
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+});
+
 const showOptionsTravel = (option) => {
     switch (option) {
         case 1:
@@ -56,7 +60,7 @@ const showOptionsTravel = (option) => {
             console.log(`A seguir insira os nomes das cidades e a modalidade de transporte conforme o número dela >\n`);
             break;
         case 2:
-            console.log(`\nCidades disponíveis para consulta: Aracaju, Belém, Belo Horizonte, Brasília, Campo Grande, á, Curitiba, Florianópolis, Fortaleza, Goiânia, João Pessoa, Maceió, Manaus, Natal, Porto Alegre, Porto Velho, Recife, Rio Branco, Rio de Janeiro, Salvador, São Luís, São Paulo, Teresina, Vitória\n`);
+            console.log(`\nCidades disponíveis para transporte: Aracaju, Belém, Belo Horizonte, Brasília, Campo Grande, á, Curitiba, Florianópolis, Fortaleza, Goiânia, João Pessoa, Maceió, Manaus, Natal, Porto Alegre, Porto Velho, Recife, Rio Branco, Rio de Janeiro, Salvador, São Luís, São Paulo, Teresina, Vitória\n`);
             console.log(`Produtos disponíveis para transporte: 1 - Celular [0.5 Kg]; 2 - Geladeira [60 Kg]; 3 - Freezer [100 Kg]; 4 - Cadeira [5 Kg]; 5 - Luminária [0.8 Kg]; 6 - Lavadora de roupas [120 Kg]\n`);
             break;
         default:
@@ -106,11 +110,6 @@ const travelCost = (distance, mode) => {
     }
     return { price, nameTransportMode };
 };
-
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-});
 
 const askCityOfOrigin = async () => {
     let city = '';
@@ -186,7 +185,7 @@ const checkValidityInputMode = async () => {
 };
 
 const askCityOfDestinyOptionTwo = async (noLog = false) => {
-    !noLog && console.log('Digite a(s) cidade(s) de destino em ordem de parada, para finalizar digite "0"');
+    !noLog && console.log('\nDigite a(s) cidade(s) de destino em ordem de parada, para finalizar digite "0"');
     const promiseCallback = (resolve) => {
         rl.question('Cidade de destino: ', (city) => {
             city = removeAccent(city);
@@ -204,7 +203,7 @@ const askCityOfDestinyOptionTwo = async (noLog = false) => {
 const askTransportProductTotal = async (noLog) => {
     let productAndQuantity = [];
 
-    !noLog && console.log('A seguir insira o ID (numero) do produto e sua quantidade, para finalizar digite um ID inexistente');
+    !noLog && console.log('\nA seguir insira o ID (numero) do produto e sua quantidade, para finalizar digite um ID inexistente');
     const promiseCallback = (resolve) => {
         rl.question('Digite o ID do produto: ', (idProduct) => {
             if (parseInt(idProduct) < 1 || parseInt(idProduct) > 6) {
@@ -216,7 +215,7 @@ const askTransportProductTotal = async (noLog) => {
                     productAndQuantity.push(parseInt(quantity));
                     if (parseInt(quantity) <= 0) {
                         console.log('Quantidade inválida, tente novamente.');
-                        resolve(null)
+                        resolve([null]);
                     }
                     resolve(productAndQuantity);
                 });
@@ -316,7 +315,7 @@ const showUserinfoTravel = async (cityOrigin, citiesDestiny, cities, nameByIdPro
         const mediumPriceByProduct = calcMediumPriceByProduct(totalPrice, products);
         const stringQuantityTrucks = buildStringQuantityTrucks(quantityTruck);
 
-        process.stdout.write(`De ${cityOrigin.toLocaleUpperCase()} para ${citiesDestiny[lastCity].toLocaleUpperCase()}`);
+        process.stdout.write(`\n-> De ${cityOrigin.toLocaleUpperCase()} para ${citiesDestiny[lastCity].toLocaleUpperCase()}`);
         process.stdout.write(` a distancia total a ser percorrida é de ${distanceBetweenCities} Km,`);
         process.stdout.write(` para transportes dos produtos ${stringNameProducts},`);
         process.stdout.write(` será necessário utilizar ${stringQuantityTrucks},`);
@@ -332,7 +331,7 @@ const showUserinfoTravel = async (cityOrigin, citiesDestiny, cities, nameByIdPro
 
         const stringStopCities = citiesDestiny.slice(0, lastCity).join(', ');
 
-        process.stdout.write(`De ${cityOrigin.toLocaleUpperCase()} para ${citiesDestiny[lastCity].toLocaleUpperCase()} parando em ${stringStopCities.toLocaleUpperCase()}`);
+        process.stdout.write(`\n-> De ${cityOrigin.toLocaleUpperCase()} para ${citiesDestiny[lastCity].toLocaleUpperCase()} parando em ${stringStopCities.toLocaleUpperCase()}`);
         process.stdout.write(` a distancia total a ser percorrida é de ${distanceBetweenCities} Km,`);
         process.stdout.write(` para transportes dos produtos ${stringNameProducts},`);
         process.stdout.write(` será necessário utilizar ${stringQuantityTrucks},`);
@@ -351,7 +350,7 @@ const createStringPriceByTypeProduct = (weightOfProducts, nameByIdProducts, prod
     const weightTotal = calcTotalWeight(weightOfProducts, products);
 
     products.forEach((product) => {
-        stringPriceByTypeProduct += `O preço médio do produto ${nameByIdProducts[product[0]]} é R$ ${((weightOfProducts[product[0]] / weightTotal) * totalPrice).toFixed(2)}\n`;
+        stringPriceByTypeProduct += `-> O preço médio do produto ${nameByIdProducts[product[0]]} é R$ ${((weightOfProducts[product[0]] / weightTotal) * totalPrice).toFixed(2)}\n`;
     });
 
     return stringPriceByTypeProduct;
@@ -362,15 +361,15 @@ const createStringPriceByTruck = (quantityTruck, distanceBetweenCities) => {
     let priceByTruck = 0;
     if (quantityTruck.truckLarge > 0) {
         priceByTruck = travelCost(distanceBetweenCities, '3').price;
-        stringPriceByTypeProduct += `O preço de viagem do(s) ${quantityTruck.truckLarge} caminhão(oes) de grande porte é de R$ ${priceByTruck.toFixed(2)}\n`;
+        stringPriceByTypeProduct += `-> O preço de viagem do(s) ${quantityTruck.truckLarge} caminhão(oes) de grande porte é de R$ ${priceByTruck.toFixed(2)}\n`;
     }
     if (quantityTruck.truckMedium > 0) {
         priceByTruck = travelCost(distanceBetweenCities, '2').price;
-        stringPriceByTypeProduct += `O preço de viagem do(s) ${quantityTruck.truckMedium} caminhão(oes) de médio porte é de R$ ${priceByTruck.toFixed(2)}\n`;
+        stringPriceByTypeProduct += `-> O preço de viagem do(s) ${quantityTruck.truckMedium} caminhão(oes) de médio porte é de R$ ${priceByTruck.toFixed(2)}\n`;
     }
     if (quantityTruck.truckSmall > 0) {
         priceByTruck = travelCost(distanceBetweenCities, '1').price;
-        stringPriceByTypeProduct += `O preço de viagem do(s) ${quantityTruck.truckSmall} caminhão(oes) de pequeno porte é de R$ ${priceByTruck.toFixed(2)}\n`;
+        stringPriceByTypeProduct += `-> O preço de viagem do(s) ${quantityTruck.truckSmall} caminhão(oes) de pequeno porte é de R$ ${priceByTruck.toFixed(2)}\n`;
     }
     return stringPriceByTypeProduct;
 };
@@ -384,11 +383,11 @@ const createStringPriceBySnippet = async (cities, cityOrigin, citiesDestiny, dis
         if (i == 0) {
             distance = await getDistanceCities(cities[cityOrigin], cities[citiesDestiny[i]]);
             price = (distance / distanceBetweenCities) * totalPrice;
-            distanceBySnippet += `De ${cityOrigin.toLocaleUpperCase()} para ${citiesDestiny[i].toLocaleUpperCase()} o custo por trecho é de R$ ${price.toFixed(2)}\n`;
+            distanceBySnippet += `-> De ${cityOrigin.toLocaleUpperCase()} para ${citiesDestiny[i].toLocaleUpperCase()} o custo por trecho é de R$ ${price.toFixed(2)}\n`;
         } else {
             distance = await getDistanceCities(cities[citiesDestiny[i - 1]], cities[citiesDestiny[i]]);
             price = (distance / distanceBetweenCities) * totalPrice;
-            distanceBySnippet += `De ${citiesDestiny[i - 1].toLocaleUpperCase()} para ${citiesDestiny[i].toLocaleUpperCase()} o custo por trecho é de R$ ${price.toFixed(2)}\n`;
+            distanceBySnippet += `-> De ${citiesDestiny[i - 1].toLocaleUpperCase()} para ${citiesDestiny[i].toLocaleUpperCase()} o custo por trecho é de R$ ${price.toFixed(2)}\n`;
         }
     }
     return distanceBySnippet;
@@ -402,18 +401,18 @@ const createStringWithInfoTravel = async (cityOrigin, citiesDestiny, cities, nam
         // custo total
         const distanceBetweenCities = await getDistanceCities(cities[cityOrigin], cities[citiesDestiny[lastCity]]);
         const totalPrice = calcPriceTravelByTruck(quantityTruck, distanceBetweenCities);
-        const stringTotalPrice = `O valor total de transporte dos itens é de R$ ${totalPrice.toFixed(2)}\n`;
+        const stringTotalPrice = `-> O valor total de transporte dos itens é de R$ ${totalPrice.toFixed(2)}\n`;
 
         const mediumPriceByKm = totalPrice / distanceBetweenCities;
-        const stringMediumPriceByKm = `O valor médio por Km rodado é de R$ ${mediumPriceByKm.toFixed(2)}\n`;
+        const stringMediumPriceByKm = `-> O valor médio por Km rodado é de R$ ${mediumPriceByKm.toFixed(2)}\n`;
 
         const addQuantityProducts = products.reduce((acc, product) => acc + product[1], 0);
-        const stringQuantityProducts = `Quantidade de produtos transportados: ${addQuantityProducts}\n`;
+        const stringQuantityProducts = `-> Quantidade de produtos transportados: ${addQuantityProducts}\n`;
 
         const priceByTypeProduct = createStringPriceByTypeProduct(weightOfProducts, nameByIdProducts, products, totalPrice);
 
         const addQuantityTruck = quantityTruck.truckLarge + quantityTruck.truckMedium + quantityTruck.truckSmall;
-        const stringQuantityTrucks = `Quantidade de veiculos deslocados: ${addQuantityTruck}\n`;
+        const stringQuantityTrucks = `-> Quantidade de veiculos deslocados: ${addQuantityTruck}\n`;
 
         const priceByTypeTruck = createStringPriceByTruck(quantityTruck, distanceBetweenCities);
 
@@ -422,21 +421,21 @@ const createStringWithInfoTravel = async (cityOrigin, citiesDestiny, cities, nam
         // custo total
         const distanceBetweenCities = await getDistanceBetweenMoreTwoCities(cities[cityOrigin], citiesDestiny, cities);
         const totalPrice = calcPriceTravelByTruck(quantityTruck, distanceBetweenCities);
-        const stringTotalPrice = `O valor total de transporte dos itens é de R$ ${totalPrice.toFixed(2)}\n`;
+        const stringTotalPrice = `-> O valor total de transporte dos itens é de R$ ${totalPrice.toFixed(2)}\n`;
 
         const mediumPriceByKm = totalPrice / distanceBetweenCities;
-        const stringMediumPriceByKm = `O valor médio por Km rodado é de R$ ${mediumPriceByKm.toFixed(2)}\n`;
+        const stringMediumPriceByKm = `-> O valor médio por Km rodado é de R$ ${mediumPriceByKm.toFixed(2)}\n`;
 
         // custo por trecho
         const distanceBySnippet = await createStringPriceBySnippet(cities, cityOrigin, citiesDestiny, distanceBetweenCities, totalPrice);
 
         const addQuantityTruck = quantityTruck.truckLarge + quantityTruck.truckMedium + quantityTruck.truckSmall;
-        const stringQuantityTrucks = `Quantidade de veiculos deslocados: ${addQuantityTruck}\n`;
+        const stringQuantityTrucks = `-> Quantidade de veiculos deslocados: ${addQuantityTruck}\n`;
 
         const priceByTypeTruck = createStringPriceByTruck(quantityTruck, distanceBetweenCities);
 
         const addQuantityProducts = products.reduce((acc, product) => acc + product[1], 0);
-        const stringQuantityProducts = `Quantidade de produtos transportados: ${addQuantityProducts}\n`;
+        const stringQuantityProducts = `-> Quantidade de produtos transportados: ${addQuantityProducts}\n`;
 
         const priceByTypeProduct = createStringPriceByTypeProduct(weightOfProducts, nameByIdProducts, products, totalPrice);
 
@@ -466,9 +465,9 @@ const showMenu = async () => {
                 const distanceBetweenCities = await getDistanceCities(cities[cityOrigin], cities[cityDestiny]);
                 const travel = travelCost(distanceBetweenCities, transportMode);
 
-                process.stdout.write(`De ${cityOrigin.toLocaleUpperCase()} para ${cityDestiny.toLocaleUpperCase()},`);
+                process.stdout.write(`\n-> De ${cityOrigin.toLocaleUpperCase()} para ${cityDestiny.toLocaleUpperCase()},`);
                 process.stdout.write(` utilizando um ${travel.nameTransportMode}, a distância é de ${distanceBetweenCities} Km`);
-                process.stdout.write(` e o custo será de R$ ${travel.price.toFixed(2)}.`);
+                process.stdout.write(` e o custo será de R$ ${travel.price.toFixed(2)}.\n`);
 
                 showMenu();
                 break;
@@ -483,7 +482,7 @@ const showMenu = async () => {
                     const response = await askCityOfDestinyOptionTwo(noLog);
                     if (response != null || response === '0') {
                         citiesDestiny.push(response);
-                    } 
+                    }
                     noLog = true;
                 } while (citiesDestiny[citiesDestiny.length - 1] !== '0');
 
@@ -496,12 +495,7 @@ const showMenu = async () => {
                 do {
                     response = await askTransportProductTotal(noLog);
                     IndexlastAddedProduct = totalproductAndQuantity.length - 1;
-                    console.log(response);
-                    if (response != null) {
-                        totalproductAndQuantity.push(response);
-                    }
-                    console.log(totalproductAndQuantity);
-                    
+                    if (response[0] != null) totalproductAndQuantity.push(response);
                     noLog = true;
                 } while (response[indexProduct] !== 0);
 
@@ -521,20 +515,23 @@ const showMenu = async () => {
                 showMenu();
                 break;
             case '3':
-                console.log('Dados estatísticos:');
-                travels.forEach((travel, index) => { 
-                    console.log(`\nViagem ${index + 1}:`);
-                    console.log(`${travel}`);
-                });
+                if (travels.length != 0) {
+                    travels.forEach((travel, index) => {
+                        console.log(`\nVIAGEM ${index + 1}:`);
+                        console.log(`${travel}`);
+                    });
+                } else {
+                    console.log('\nNão há viagens cadastradas.');
+                }
 
                 showMenu();
                 break;
             case '4':
-                console.log('Programa encerrado!');
+                console.log('\nPROGRAMA ENCERRADO!\n');
                 rl.close();
                 break;
             default:
-                console.log('Opção inválida.\n');
+                console.log('\nOPÇÃO INVÁLIDA!');
                 showMenu();
                 break;
         }
