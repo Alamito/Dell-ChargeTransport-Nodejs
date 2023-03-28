@@ -234,7 +234,7 @@ const calcQuantityTruck = (weight) => {
 const calcTotalWeight = (weightOfProducts, productAndQuantity) => {
     let weight = 0;
 
-    for (let i = 0; i < productAndQuantity.length - 1; i += 1) {
+    for (let i = 0; i < productAndQuantity.length; i += 1) {
         weight += weightOfProducts[productAndQuantity[i][0]] * productAndQuantity[i][1];
     }
 
@@ -283,43 +283,112 @@ const calcMediumPriceByProduct = (priceTravel, products) => {
     return priceTravel / quantityProducts;
 };
 
+const getDistanceBetweenMoreTwoCities = async (cityOrigin, citiesDestiny, cities) => {
+    let totalDistance = 0;
+    for (let i in citiesDestiny) {
+        if (i == 0) totalDistance += await getDistanceCities(cityOrigin, cities[citiesDestiny[i]]);
+        else {
+            totalDistance += await getDistanceCities(cities[citiesDestiny[i - 1]], cities[citiesDestiny[i]]);
+        }
+    }
+    return totalDistance;
+};
+
 const showUserinfoTravel = async (cityOrigin, citiesDestiny, cities, nameByIdProducts, products, quantityTruck) => {
-    citiesDestiny.pop();
-    products.pop();
     const lastCity = citiesDestiny.length - 1;
-    const distanceBetweenCities = await getDistanceCities(cities[cityOrigin], cities[citiesDestiny[lastCity]]);
 
     let stringNameProducts = products.map((namesProducts) => nameByIdProducts[namesProducts[0]]);
     stringNameProducts = stringNameProducts.join(', '); // adiciona espaco depois da virgula
 
-    const stringQuantityTrucks = buildStringQuantityTrucks(quantityTruck);
-
-    const totalPrice = calcPriceTravelByTruck(quantityTruck, distanceBetweenCities);
-
-    const mediumPriceByProduct = calcMediumPriceByProduct(totalPrice, products);
-
     if (citiesDestiny.length === 1) {
         // viagem direta
+        const distanceBetweenCities = await getDistanceCities(cities[cityOrigin], cities[citiesDestiny[lastCity]]);
+        const totalPrice = calcPriceTravelByTruck(quantityTruck, distanceBetweenCities);
+        const mediumPriceByProduct = calcMediumPriceByProduct(totalPrice, products);
+        const stringQuantityTrucks = buildStringQuantityTrucks(quantityTruck);
+
         process.stdout.write(`De ${cityOrigin} para ${citiesDestiny[lastCity]}`);
         process.stdout.write(` a distancia total a ser percorrida é de ${distanceBetweenCities} Km,`);
         process.stdout.write(` para transportes dos produtos ${stringNameProducts},`);
         process.stdout.write(` será necessário utilizar ${stringQuantityTrucks},`);
         process.stdout.write(` de forma a resultar no menor custo por Km rodado.`);
         process.stdout.write(` O valor total do transporte dos itens é R$ ${totalPrice.toFixed(2)},`);
-        process.stdout.write(` sendo R$ ${mediumPriceByProduct.toFixed(2)} o custo unitário médio.`);
+        process.stdout.write(` sendo R$ ${mediumPriceByProduct.toFixed(2)} o custo unitário médio.\n`);
     } else {
         // viagem com paradas
+        const distanceBetweenCities = await getDistanceBetweenMoreTwoCities(cities[cityOrigin], citiesDestiny, cities);
+        const totalPrice = calcPriceTravelByTruck(quantityTruck, distanceBetweenCities);
+        const mediumPriceByProduct = calcMediumPriceByProduct(totalPrice, products);
+        const stringQuantityTrucks = buildStringQuantityTrucks(quantityTruck);
+
         const stringStopCities = citiesDestiny.slice(0, lastCity).join(', ');
+
         process.stdout.write(`De ${cityOrigin} para ${citiesDestiny[lastCity]} parando em ${stringStopCities},`);
         process.stdout.write(` a distancia total a ser percorrida é de ${distanceBetweenCities} Km,`);
         process.stdout.write(` para transportes dos produtos ${stringNameProducts},`);
         process.stdout.write(` será necessário utilizar ${stringQuantityTrucks},`);
         process.stdout.write(` de forma a resultar no menor custo por Km rodado.`);
         process.stdout.write(` O valor total do transporte dos itens é R$ ${totalPrice.toFixed(2)},`);
-        process.stdout.write(` sendo R$ ${mediumPriceByProduct.toFixed(2)} o custo unitário médio.`);
+        process.stdout.write(` sendo R$ ${mediumPriceByProduct.toFixed(2)} o custo unitário médio.\n`);
         // o console.log() possui quebra de linha no final logo seria necessario escrever tudo em um unico console.log()
         // para que as mensagens ficassem na mesma linha
         // entao foi utilizado o process.stdout.write() para evitar a quebra de linha e deixar o codigo mais limpo
+    }
+};
+
+let travels = [];
+
+const getStringPriceByTypeProduct = (weightOfProducts, nameByIdProducts, products, totalPrice) => {
+    let stringPriceByTypeProduct = '';
+
+    const weightTotal = calcTotalWeight(weightOfProducts, products);
+
+    products.forEach((product) => {
+        stringPriceByTypeProduct += `O preço médio do produto ${nameByIdProducts[product[0]]} é R$ ${((weightOfProducts[product[0]] / weightTotal) * totalPrice).toFixed(2)}\n`;
+    });
+
+    return stringPriceByTypeProduct;
+};
+
+const createObjectWithInfoTravel = async (cityOrigin, citiesDestiny, cities, nameByIdProducts, products, quantityTruck, weightOfProducts) => {
+    const lastCity = citiesDestiny.length - 1;
+
+    if (citiesDestiny.length === 1) {
+        const distanceBetweenCities = await getDistanceCities(cities[cityOrigin], cities[citiesDestiny[lastCity]]);
+
+        const totalPrice = calcPriceTravelByTruck(quantityTruck, distanceBetweenCities);
+
+        const mediumPriceByKm = totalPrice / distanceBetweenCities;
+
+        const priceByTypeProduct = getStringPriceByTypeProduct(weightOfProducts, nameByIdProducts, products, totalPrice);
+    } else {
+        // custo total
+        const distanceBetweenCities = await getDistanceBetweenMoreTwoCities(cities[cityOrigin], citiesDestiny, cities);
+        const totalPrice = calcPriceTravelByTruck(quantityTruck, distanceBetweenCities);
+
+        // custo medio por Km
+        const mediumPriceByKm = totalPrice / distanceBetweenCities;
+
+        // custo por trecho
+        let distance = 0;
+        let price = 0;
+        let distanceBySnippet = '';
+
+        for (let i in citiesDestiny) {
+            if (i == 0) {
+                distance = await getDistanceCities(cities[cityOrigin], cities[citiesDestiny[i]]);
+                price = (distance / distanceBetweenCities) * totalPrice;
+                distanceBySnippet += `De ${cityOrigin} para ${citiesDestiny[i]} o custo por trecho é de R$ ${price.toFixed(2)}\n`;
+            } else {
+                distance = await getDistanceCities(cities[citiesDestiny[i - 1]], cities[citiesDestiny[i]]);
+                price = (distance / distanceBetweenCities) * totalPrice;
+                distanceBySnippet += `De ${citiesDestiny[i - 1]} para ${citiesDestiny[i]} o custo por trecho é de R$ ${price.toFixed(2)}\n`;
+            }
+        }
+
+        // custo medio por tipo de produto
+        const priceByTypeProduct = getStringPriceByTypeProduct(weightOfProducts, nameByIdProducts, products, totalPrice);
+        
     }
 };
 
@@ -349,7 +418,6 @@ const showMenu = async () => {
                 process.stdout.write(` e o custo será de R$ ${travel.price.toFixed(2)}.`);
 
                 showMenu();
-
                 break;
             case '2':
                 showOptionsTravel(2);
@@ -374,19 +442,26 @@ const showMenu = async () => {
                     noLog = true;
                 } while (totalproductAndQuantity[IndexlastAddedProduct][indexProduct] !== 0);
 
+                totalproductAndQuantity.pop();
                 const totalWeight = calcTotalWeight(weightOfProducts, totalproductAndQuantity);
 
                 const quantityTruck = calcQuantityTruck(totalWeight);
 
-                await showUserinfoTravel(cityOriginOptionTwo, citiesDestiny, cities, nameByIdProducts, totalproductAndQuantity, quantityTruck);
+                citiesDestiny.pop();
+
+                // await showUserinfoTravel(cityOriginOptionTwo, citiesDestiny, cities, nameByIdProducts, totalproductAndQuantity, quantityTruck);
 
                 // console.log('Carga cadastrada com sucesso!');
 
-                // rl.close();
+                await createObjectWithInfoTravel(cityOriginOptionTwo, citiesDestiny, cities, nameByIdProducts, totalproductAndQuantity, quantityTruck, weightOfProducts);
+
                 showMenu();
                 break;
             case '3':
                 console.log('Até logo!');
+                break;
+            case '4':
+                console.log('Programa encerrado!');
                 rl.close();
                 break;
             default:
