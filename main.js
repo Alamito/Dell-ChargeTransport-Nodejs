@@ -504,7 +504,7 @@ const showMenu = async () => {
                 } while (response[indexProduct] !== 0);
 
                 if (noneProduct(totalproductAndQuantity)) {
-                    console.log('\nNenhum produto cadastrado!');
+                    console.log('\nNenhuma carga cadastrada');
                     showMenu();
                     break;
                 }
