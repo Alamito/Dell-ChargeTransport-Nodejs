@@ -336,9 +336,7 @@ const showUserinfoTravel = async (cityOrigin, citiesDestiny, cities, nameByIdPro
     }
 };
 
-let travels = [];
-
-const getStringPriceByTypeProduct = (weightOfProducts, nameByIdProducts, products, totalPrice) => {
+const createStringPriceByTypeProduct = (weightOfProducts, nameByIdProducts, products, totalPrice) => {
     let stringPriceByTypeProduct = '';
 
     const weightTotal = calcTotalWeight(weightOfProducts, products);
@@ -350,45 +348,90 @@ const getStringPriceByTypeProduct = (weightOfProducts, nameByIdProducts, product
     return stringPriceByTypeProduct;
 };
 
-const createObjectWithInfoTravel = async (cityOrigin, citiesDestiny, cities, nameByIdProducts, products, quantityTruck, weightOfProducts) => {
+const createStringPriceByTruck = (quantityTruck, distanceBetweenCities) => {
+    let stringPriceByTypeProduct = '';
+    let priceByTruck = 0;
+    if (quantityTruck.truckLarge > 0) {
+        priceByTruck = travelCost(distanceBetweenCities, '3').price;
+        stringPriceByTypeProduct += `O preço de viagem do(s) ${quantityTruck.truckLarge} caminhão(oes) de grande porte é de R$ ${priceByTruck.toFixed(2)}\n`;
+    }
+    if (quantityTruck.truckMedium > 0) {
+        priceByTruck = travelCost(distanceBetweenCities, '2').price;
+        stringPriceByTypeProduct += `O preço de viagem do(s) ${quantityTruck.truckMedium} caminhão(oes) de médio porte é de R$ ${priceByTruck.toFixed(2)}\n`;
+    }
+    if (quantityTruck.truckSmall > 0) {
+        priceByTruck = travelCost(distanceBetweenCities, '1').price;
+        stringPriceByTypeProduct += `O preço de viagem do(s) ${quantityTruck.truckSmall} caminhão(oes) de pequeno porte é de R$ ${priceByTruck.toFixed(2)}\n`;
+    }
+    return stringPriceByTypeProduct;
+};
+
+const createStringPriceBySnippet = async (cities, cityOrigin, citiesDestiny, distanceBetweenCities, totalPrice) => {
+    let distance = 0;
+    let price = 0;
+    let distanceBySnippet = '';
+
+    for (let i in citiesDestiny) {
+        if (i == 0) {
+            distance = await getDistanceCities(cities[cityOrigin], cities[citiesDestiny[i]]);
+            price = (distance / distanceBetweenCities) * totalPrice;
+            distanceBySnippet += `De ${cityOrigin} para ${citiesDestiny[i]} o custo por trecho é de R$ ${price.toFixed(2)}\n`;
+        } else {
+            distance = await getDistanceCities(cities[citiesDestiny[i - 1]], cities[citiesDestiny[i]]);
+            price = (distance / distanceBetweenCities) * totalPrice;
+            distanceBySnippet += `De ${citiesDestiny[i - 1]} para ${citiesDestiny[i]} o custo por trecho é de R$ ${price.toFixed(2)}\n`;
+        }
+    }
+    return distanceBySnippet;
+};
+
+let travels = [];
+const createStringWithInfoTravel = async (cityOrigin, citiesDestiny, cities, nameByIdProducts, products, quantityTruck, weightOfProducts) => {
     const lastCity = citiesDestiny.length - 1;
 
     if (citiesDestiny.length === 1) {
+        // custo total
         const distanceBetweenCities = await getDistanceCities(cities[cityOrigin], cities[citiesDestiny[lastCity]]);
-
         const totalPrice = calcPriceTravelByTruck(quantityTruck, distanceBetweenCities);
+        const stringTotalPrice = `O valor total de transporte dos itens é de R$ ${totalPrice.toFixed(2)}\n`;
 
         const mediumPriceByKm = totalPrice / distanceBetweenCities;
+        const stringMediumPriceByKm = `O valor médio por Km rodado é de R$ ${mediumPriceByKm.toFixed(2)}\n`;
 
-        const priceByTypeProduct = getStringPriceByTypeProduct(weightOfProducts, nameByIdProducts, products, totalPrice);
+        const addQuantityProducts = products.reduce((acc, product) => acc + product[1], 0);
+        const stringQuantityProducts = `Quantidade de produtos transportados: ${addQuantityProducts}\n`;
+
+        const priceByTypeProduct = createStringPriceByTypeProduct(weightOfProducts, nameByIdProducts, products, totalPrice);
+
+        const addQuantityTruck = quantityTruck.truckLarge + quantityTruck.truckMedium + quantityTruck.truckSmall;
+        const stringQuantityTrucks = `Quantidade de veiculos deslocados: ${addQuantityTruck}\n`;
+
+        const priceByTypeTruck = createStringPriceByTruck(quantityTruck, distanceBetweenCities);
+
+        travels.push(`${stringTotalPrice}${stringMediumPriceByKm}${stringQuantityProducts}${priceByTypeProduct}${stringQuantityTrucks}${priceByTypeTruck}`);
     } else {
         // custo total
         const distanceBetweenCities = await getDistanceBetweenMoreTwoCities(cities[cityOrigin], citiesDestiny, cities);
         const totalPrice = calcPriceTravelByTruck(quantityTruck, distanceBetweenCities);
+        const stringTotalPrice = `O valor total de transporte dos itens é de R$ ${totalPrice.toFixed(2)}\n`;
 
-        // custo medio por Km
         const mediumPriceByKm = totalPrice / distanceBetweenCities;
+        const stringMediumPriceByKm = `O valor médio por Km rodado é de R$ ${mediumPriceByKm.toFixed(2)}\n`;
 
         // custo por trecho
-        let distance = 0;
-        let price = 0;
-        let distanceBySnippet = '';
+        const distanceBySnippet = await createStringPriceBySnippet(cities, cityOrigin, citiesDestiny, distanceBetweenCities, totalPrice);
 
-        for (let i in citiesDestiny) {
-            if (i == 0) {
-                distance = await getDistanceCities(cities[cityOrigin], cities[citiesDestiny[i]]);
-                price = (distance / distanceBetweenCities) * totalPrice;
-                distanceBySnippet += `De ${cityOrigin} para ${citiesDestiny[i]} o custo por trecho é de R$ ${price.toFixed(2)}\n`;
-            } else {
-                distance = await getDistanceCities(cities[citiesDestiny[i - 1]], cities[citiesDestiny[i]]);
-                price = (distance / distanceBetweenCities) * totalPrice;
-                distanceBySnippet += `De ${citiesDestiny[i - 1]} para ${citiesDestiny[i]} o custo por trecho é de R$ ${price.toFixed(2)}\n`;
-            }
-        }
+        const addQuantityTruck = quantityTruck.truckLarge + quantityTruck.truckMedium + quantityTruck.truckSmall;
+        const stringQuantityTrucks = `Quantidade de veiculos deslocados: ${addQuantityTruck}\n`;
 
-        // custo medio por tipo de produto
-        const priceByTypeProduct = getStringPriceByTypeProduct(weightOfProducts, nameByIdProducts, products, totalPrice);
-        
+        const priceByTypeTruck = createStringPriceByTruck(quantityTruck, distanceBetweenCities);
+
+        const addQuantityProducts = products.reduce((acc, product) => acc + product[1], 0);
+        const stringQuantityProducts = `Quantidade de produtos transportados: ${addQuantityProducts}\n`;
+
+        const priceByTypeProduct = createStringPriceByTypeProduct(weightOfProducts, nameByIdProducts, products, totalPrice);
+
+        travels.push(`${stringTotalPrice}${distanceBySnippet}${stringMediumPriceByKm}${stringQuantityProducts}${priceByTypeProduct}${stringQuantityTrucks}${priceByTypeTruck}`);
     }
 };
 
@@ -397,6 +440,7 @@ const showMenu = async () => {
     console.log('1 - Consultar trechos x modalidade');
     console.log('2 - Cadastrar transporte');
     console.log('3 - Dados estatísticos');
+    console.log('4 - Sair');
 
     rl.question('Opção escolhida: ', async (option) => {
         switch (option) {
@@ -449,16 +493,22 @@ const showMenu = async () => {
 
                 citiesDestiny.pop();
 
-                // await showUserinfoTravel(cityOriginOptionTwo, citiesDestiny, cities, nameByIdProducts, totalproductAndQuantity, quantityTruck);
+                await showUserinfoTravel(cityOriginOptionTwo, citiesDestiny, cities, nameByIdProducts, totalproductAndQuantity, quantityTruck);
 
-                // console.log('Carga cadastrada com sucesso!');
+                console.log('\nCarga cadastrada com sucesso!');
 
-                await createObjectWithInfoTravel(cityOriginOptionTwo, citiesDestiny, cities, nameByIdProducts, totalproductAndQuantity, quantityTruck, weightOfProducts);
+                await createStringWithInfoTravel(cityOriginOptionTwo, citiesDestiny, cities, nameByIdProducts, totalproductAndQuantity, quantityTruck, weightOfProducts);
 
                 showMenu();
                 break;
             case '3':
-                console.log('Até logo!');
+                console.log('Dados estatísticos:');
+                travels.forEach((travel, index) => { 
+                    console.log(`\nViagem ${index + 1}:`);
+                    console.log(`${travel}`);
+                });
+
+                showMenu();
                 break;
             case '4':
                 console.log('Programa encerrado!');
