@@ -157,6 +157,7 @@ const findCity = (cities, city) => {
 
 const checkValidityInputCity = async (askCity) => {
     let city = '';
+
     do {
         city = await askCity();
         city = removeAccent(city);
@@ -185,12 +186,16 @@ const checkValidityInputMode = async () => {
 };
 
 const askCityOfDestinyOptionTwo = async (noLog = false) => {
-    // let city = '';
-
     !noLog && console.log('Digite a(s) cidade(s) de destino em ordem de parada, para finalizar digite "0"');
     const promiseCallback = (resolve) => {
         rl.question('Cidade de destino: ', (city) => {
-            resolve(city);
+            city = removeAccent(city);
+            if (!findCity(cities, city) && city !== '0') {
+                console.log('Cidade inválida, tente novamente.');
+                resolve(null);
+            } else {
+                resolve(city.toLowerCase());
+            }
         });
     };
     return new Promise(promiseCallback);
@@ -323,7 +328,7 @@ const showUserinfoTravel = async (cityOrigin, citiesDestiny, cities, nameByIdPro
 
         const stringStopCities = citiesDestiny.slice(0, lastCity).join(', ');
 
-        process.stdout.write(`De ${cityOrigin} para ${citiesDestiny[lastCity]} parando em ${stringStopCities},`);
+        process.stdout.write(`De ${cityOrigin.toLocaleUpperCase()} para ${citiesDestiny[lastCity].toLocaleUpperCase()} parando em ${stringStopCities.toLocaleUpperCase()}`);
         process.stdout.write(` a distancia total a ser percorrida é de ${distanceBetweenCities} Km,`);
         process.stdout.write(` para transportes dos produtos ${stringNameProducts},`);
         process.stdout.write(` será necessário utilizar ${stringQuantityTrucks},`);
@@ -375,11 +380,11 @@ const createStringPriceBySnippet = async (cities, cityOrigin, citiesDestiny, dis
         if (i == 0) {
             distance = await getDistanceCities(cities[cityOrigin], cities[citiesDestiny[i]]);
             price = (distance / distanceBetweenCities) * totalPrice;
-            distanceBySnippet += `De ${cityOrigin} para ${citiesDestiny[i]} o custo por trecho é de R$ ${price.toFixed(2)}\n`;
+            distanceBySnippet += `De ${cityOrigin.toLocaleUpperCase()} para ${citiesDestiny[i].toLocaleUpperCase()} o custo por trecho é de R$ ${price.toFixed(2)}\n`;
         } else {
             distance = await getDistanceCities(cities[citiesDestiny[i - 1]], cities[citiesDestiny[i]]);
             price = (distance / distanceBetweenCities) * totalPrice;
-            distanceBySnippet += `De ${citiesDestiny[i - 1]} para ${citiesDestiny[i]} o custo por trecho é de R$ ${price.toFixed(2)}\n`;
+            distanceBySnippet += `De ${citiesDestiny[i - 1].toLocaleUpperCase()} para ${citiesDestiny[i].toLocaleUpperCase()} o custo por trecho é de R$ ${price.toFixed(2)}\n`;
         }
     }
     return distanceBySnippet;
@@ -471,7 +476,10 @@ const showMenu = async () => {
                 let noLog = false;
 
                 do {
-                    citiesDestiny.push(await askCityOfDestinyOptionTwo(noLog));
+                    const response = await askCityOfDestinyOptionTwo(noLog);
+                    if (response != null || response === '0') {
+                        citiesDestiny.push(response);
+                    } 
                     noLog = true;
                 } while (citiesDestiny[citiesDestiny.length - 1] !== '0');
 
