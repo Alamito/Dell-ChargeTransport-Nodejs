@@ -55,12 +55,12 @@ const rl = readline.createInterface({
 const showOptionsTravel = (option) => {
     switch (option) {
         case 1:
-            console.log(`\nCidades disponíveis para consulta: Aracaju, Belém, Belo Horizonte, Brasília, Campo Grande, á, Curitiba, Florianópolis, Fortaleza, Goiânia, João Pessoa, Maceió, Manaus, Natal, Porto Alegre, Porto Velho, Recife, Rio Branco, Rio de Janeiro, Salvador, São Luís, São Paulo, Teresina, Vitória\n`);
+            console.log(`\nCidades disponíveis para consulta: Aracaju, Belém, Belo Horizonte, Brasília, Campo Grande, Cuiabá, Curitiba, Florianópolis, Fortaleza, Goiânia, João Pessoa, Maceió, Manaus, Natal, Porto Alegre, Porto Velho, Recife, Rio Branco, Rio de Janeiro, Salvador, São Luís, São Paulo, Teresina, Vitória\n`);
             console.log(`Modalidades de transporte disponíveis: 1 - Caminhão de pequeno porte, 2 - Caminhão de médio porte, 3 - Caminhão de grande porte\n`);
             console.log(`A seguir insira os nomes das cidades e a modalidade de transporte conforme o número dela >\n`);
             break;
         case 2:
-            console.log(`\nCidades disponíveis para transporte: Aracaju, Belém, Belo Horizonte, Brasília, Campo Grande, á, Curitiba, Florianópolis, Fortaleza, Goiânia, João Pessoa, Maceió, Manaus, Natal, Porto Alegre, Porto Velho, Recife, Rio Branco, Rio de Janeiro, Salvador, São Luís, São Paulo, Teresina, Vitória\n`);
+            console.log(`\nCidades disponíveis para transporte: Aracaju, Belém, Belo Horizonte, Brasília, Campo Grande, Cuiabá, Curitiba, Florianópolis, Fortaleza, Goiânia, João Pessoa, Maceió, Manaus, Natal, Porto Alegre, Porto Velho, Recife, Rio Branco, Rio de Janeiro, Salvador, São Luís, São Paulo, Teresina, Vitória\n`);
             console.log(`Produtos disponíveis para transporte: 1 - Celular [0.5 Kg]; 2 - Geladeira [60 Kg]; 3 - Freezer [100 Kg]; 4 - Cadeira [5 Kg]; 5 - Luminária [0.8 Kg]; 6 - Lavadora de roupas [120 Kg]\n`);
             break;
         default:
@@ -302,6 +302,10 @@ const getDistanceBetweenMoreTwoCities = async (cityOrigin, citiesDestiny, cities
     return totalDistance;
 };
 
+const noneProduct = (products) => { 
+    if (products.length === 1 && products[0][0] === 0) return true;
+}
+
 const showUserinfoTravel = async (cityOrigin, citiesDestiny, cities, nameByIdProducts, products, quantityTruck) => {
     const lastCity = citiesDestiny.length - 1;
 
@@ -498,6 +502,12 @@ const showMenu = async () => {
                     if (response[0] != null) totalproductAndQuantity.push(response);
                     noLog = true;
                 } while (response[indexProduct] !== 0);
+
+                if (noneProduct(totalproductAndQuantity)) {
+                    console.log('\nNenhum produto cadastrado!');
+                    showMenu();
+                    break;
+                }
 
                 totalproductAndQuantity.pop();
                 const totalWeight = calcTotalWeight(weightOfProducts, totalproductAndQuantity);
