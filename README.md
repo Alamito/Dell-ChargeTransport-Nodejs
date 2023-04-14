@@ -3,7 +3,7 @@
 
 # 📜 Sobre o projeto 📜
 <p align="justify">
-Projeto dedicado ao desafio prático proposto pela empresa DELL Brasil em conjunto com a PUCRS em seu processo seletivo, no qual tem como objetivo o desenvolvimento de de um sistema de transporte interestadual de cargas. Para o desenvolvimento da aplicação foi fornecido um arquivo .CSV contendo dados de distâncias entre as cidades fornecidos pelo DNIT, bem como uma tabela de itens e de modelos de transporte.<br>
+Projeto dedicado ao desafio prático proposto pela empresa DELL Brasil em conjunto com a PUCRS em seu processo seletivo, no qual tem como objetivo o desenvolvimento de de um sistema de transporte interestadual de cargas. Para o desenvolvimento da aplicação foi fornecido um arquivo .CSV contendo dados de distâncias entre as cidades, bem como uma tabela de itens e de modelos de transporte.<br>
 </p>
 
 | ITENS | Peso (Kg) |
