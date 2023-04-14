@@ -15,11 +15,11 @@ Projeto dedicado ao desafio prático proposto pela empresa DELL Brasil em conjun
 | Luminária | 0.8 |
 | Lavadora de roupa | 120kg |
 
-| ITENS | Preço por Km (R$/Km) |
+| CAMINHÂO | Preço por Km (R$/Km) |
 | -------- | -------- |
-| Caminhão de pequeno porte | 4,87 |
-| Caminhão de médio porte | 11,92 |
-| Caminhão de grande porte | 27,44 |
+| Pequeno porte | 4,87 |
+| Médio porte | 11,92 |
+| Grande porte | 27,44 |
 
 <p align="justify">
 O desenvolvimento da aplicação foi dividido entre três funcionalidades: (1) Consultar trechos x modalidade; (2) Cadastrar transporte; e (3) Dados estatísticos.
